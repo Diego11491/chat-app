@@ -29,12 +29,19 @@ io.on("connection", (socket) => {
     username = username.trim() || "Anónimo";
     users[socket.id] = username;
     console.log(`${username} se unió al chat.`);
-    io.emit("userList", Object.values(users));
+    // Actualiza lista de usuarios
+    io.emit("userList", Object.values(users)); 
   });
 
   socket.on("chatMessage", (msg) => {
     const sender = users[socket.id] || "Anónimo";
     io.emit("chatMessage", { sender, msg });
+  });
+
+  socket.on("typing", () => {
+    const sender = users[socket.id] || "Anónimo";
+    // Notifica a los demas quien esta escribiendo
+    socket.broadcast.emit("typing", sender); 
   });
 
   socket.on("disconnect", () => {
@@ -49,4 +56,3 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
